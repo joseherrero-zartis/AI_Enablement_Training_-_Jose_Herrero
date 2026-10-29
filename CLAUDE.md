@@ -37,6 +37,16 @@ Node 24 via nvm (`.nvmrc`). In non-interactive shells, load nvm first: `export N
 - The mastery hint (3 attempts rated 4+) is a suggestion only and never blocks the user.
 - Ratings are integers from 1 to 5. Only the overall `rating` is required.
 
+## Error handling
+
+Expected errors are returned as values. Unexpected errors are thrown.
+
+- **Expected errors** (invalid input, rule violations such as logging an attempt on a locked challenge, a challenge that doesn't exist) are **returned** from the Server Action as `{ error?: string; fieldErrors?: Record<string, string> }`, never thrown. Next hides thrown error messages in production, so a thrown validation error would never reach the user. The form is a small `"use client"` component that reads the result with `useActionState` and shows the messages next to the fields. Nothing is written when validation fails.
+- **Validation** uses hand-written pure functions in `src/lib/domain/` (for example `validateAttempt()`) that return field errors, with unit tests. Don't add a validation library. Each action follows the same order: parse `FormData` → validate → check domain rules against the DB → write (in one transaction if it touches more than one row) → refresh or redirect.
+- **Missing resources** in pages: call `notFound()`.
+- **Unexpected errors** (SQLite failures, bugs, broken invariants): let them throw to `app/error.tsx`. Don't add defensive `try/catch`. If you catch an error to log it with `logger.error`, rethrow it.
+- **Never wrap `redirect()` or `notFound()` in `try/catch`.** They work by throwing.
+
 ## Conventions
 
 - TypeScript strict mode. Import from `src` with the `@/` alias.
