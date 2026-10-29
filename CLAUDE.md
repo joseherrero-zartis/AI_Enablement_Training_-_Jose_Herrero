@@ -53,6 +53,15 @@ Expected errors are returned as values. Unexpected errors are thrown.
 - Tailwind for styling. Support dark mode with `dark:` variants, as the existing pages do.
 - Tests sit next to their code as `*.test.ts`. Use an in-memory DB for query tests.
 
+## Gherkin scenarios (`docs/tests/`)
+
+Gherkin `.feature` files describe how each user story should behave. They live in `docs/tests/`, next to the stories in `docs/stories/`. See `docs/tests/README.md` for the full conventions.
+
+- **One file per story, with the same name:** `docs/stories/US-02-log-attempt.md` → `docs/tests/US-02-log-attempt.feature`. If the file already exists, update it instead of creating a new one.
+- **Cover every acceptance criterion** with at least one scenario, and tag each scenario with the story and criterion, for example `@US-02 @AC-3`.
+- **Write from the baker's point of view,** in plain language, with no code, SQL or component names.
+- **They're specifications, not automated tests.** There's no Cucumber runner, so `npm test` doesn't run them. Don't add a runner unless asked.
+
 ## Training diary (`REFLECTION.md`)
 
 `REFLECTION.md` is the developer's personal diary of this training: what they did, learnt and felt each day. It isn't project documentation.
