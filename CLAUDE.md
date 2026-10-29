@@ -53,6 +53,15 @@ Expected errors are returned as values. Unexpected errors are thrown.
 - Tailwind for styling. Support dark mode with `dark:` variants, as the existing pages do.
 - Tests sit next to their code as `*.test.ts`. Use an in-memory DB for query tests.
 
+## Git workflow
+
+`main` only changes through pull requests. Never commit or push to `main` directly.
+
+- **One branch per feature,** created from an up-to-date `main` before the first change. Name it after the story or the change, for example `feature/US-02-log-attempt` or `fix/journey-order`.
+- **Commit and push to the feature branch,** never to `main`. If you find yourself on `main` with changes, create the branch first and commit there.
+- **Merge into `main` with a pull request.** Use the `pr-description` skill for the description. Don't merge it yourself unless the developer asks.
+- **Don't force-push to or delete `main`,** and don't rewrite its history.
+
 ## Gherkin scenarios (`docs/tests/`)
 
 Gherkin `.feature` files describe how each user story should behave. They live in `docs/tests/`, next to the stories in `docs/stories/`. See `docs/tests/README.md` for the full conventions.
