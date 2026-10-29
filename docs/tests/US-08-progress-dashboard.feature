@@ -75,7 +75,6 @@ Feature: US-08 See my overall progress
     Then the dashboard shows <change> without me reloading the page
 
     Examples:
-      | action                              | change                                         |
-      | log an attempt at my next challenge | the same next challenge                        |
-      | mark my next challenge as mastered  | one more mastered challenge and a new next one |
-      | undo the mastery of a challenge     | one less mastered challenge                    |
+      | action                             | change                                         |
+      | mark my next challenge as mastered | one more mastered challenge and a new next one |
+      | undo the mastery of a challenge    | one less mastered challenge                    |

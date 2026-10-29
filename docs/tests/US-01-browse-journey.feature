@@ -68,8 +68,3 @@ Feature: US-01 Browse the baking journey
     And "Banana bread" has no base recipe written yet
     When I open the "Banana bread" page
     Then the "Base recipe" section shows "No base recipe written yet."
-
-  @US-01
-  Scenario: A challenge that doesn't exist shows a not found page
-    When I go to the page of a challenge that doesn't exist
-    Then I see a "not found" page

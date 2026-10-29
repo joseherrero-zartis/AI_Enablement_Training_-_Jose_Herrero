@@ -74,6 +74,14 @@ describe("meetsMasteryHint", () => {
     expect(meetsMasteryHint([5, 4, 3, 2])).toBe(false);
     expect(meetsMasteryHint([5, 4, 4, 1])).toBe(true);
   });
+
+  it("is met by exactly three attempts rated 4", () => {
+    expect(meetsMasteryHint([4, 4, 4])).toBe(true);
+  });
+
+  it("is not met without attempts", () => {
+    expect(meetsMasteryHint([])).toBe(false);
+  });
 });
 
 describe("summarizeProgress", () => {
@@ -88,13 +96,35 @@ describe("summarizeProgress", () => {
       item(2, "in_progress", "intermediate"),
       item(3, "locked", "intermediate"),
     ]);
-    expect(summary).toMatchObject({ mastered: 1, total: 3, currentLevel: "intermediate" });
+    expect(summary).toMatchObject({
+      mastered: 1,
+      total: 3,
+      percent: 33,
+      complete: false,
+      currentLevel: "intermediate",
+    });
     expect(summary.nextChallenge?.position).toBe(2);
   });
 
-  it("has no next challenge once everything is mastered", () => {
+  it("goes back to an earlier challenge whose mastery was undone", () => {
+    // Undoing #1 never re-locks #2, so a later challenge can be mastered while an earlier one isn't.
+    // Items are out of order to check the sort.
+    const summary = summarizeProgress([
+      item(3, "not_started"),
+      item(1, "not_started"),
+      item(2, "mastered"),
+    ]);
+    expect(summary.nextChallenge?.position).toBe(1);
+    expect(summary.mastered).toBe(1);
+  });
+
+  it("is complete once everything is mastered", () => {
     const summary = summarizeProgress([item(1, "mastered"), item(2, "mastered", "master")]);
+    expect(summary).toMatchObject({ percent: 100, complete: true, currentLevel: "master" });
     expect(summary.nextChallenge).toBeNull();
-    expect(summary.currentLevel).toBe("master");
+  });
+
+  it("is not complete for an empty journey", () => {
+    expect(summarizeProgress([])).toMatchObject({ percent: 0, complete: false });
   });
 });

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect } from "react";
-import { logger } from "@/utils/logger";
+import { logger } from "@/lib/logger";
 
 // Catches unexpected errors (SQLite failures, bugs) thrown while rendering a route.
 // Expected errors are returned from Server Actions and never reach this boundary (ADR 005).
@@ -17,7 +17,8 @@ export default function ErrorPage({
   const router = useRouter();
 
   useEffect(() => {
-    logger.error("Unexpected error", error);
+    // The digest matches the reference shown below and the full error in the server logs.
+    logger.error("Unexpected error", { digest: error.digest }, error);
   }, [error]);
 
   // Refresh first so Server Components re-run their queries, then re-render the segment.

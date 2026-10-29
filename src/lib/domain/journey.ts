@@ -56,6 +56,10 @@ export function meetsMasteryHint(ratings: number[]): boolean {
 export interface ProgressSummary {
   mastered: number;
   total: number;
+  /** Mastered share of the journey, rounded to a whole percent. */
+  percent: number;
+  /** True once every challenge is mastered. */
+  complete: boolean;
   /** Level of the next challenge, or the last level once everything is mastered. */
   currentLevel: Level;
   /** First unlocked, not-yet-mastered challenge in journey order. */
@@ -65,10 +69,14 @@ export interface ProgressSummary {
 export function summarizeProgress(items: JourneyItem[]): ProgressSummary {
   const ordered = [...items].sort((a, b) => a.challenge.position - b.challenge.position);
   const next = ordered.find((i) => i.status === "not_started" || i.status === "in_progress");
+  const mastered = ordered.filter((i) => i.status === "mastered").length;
+  const total = ordered.length;
 
   return {
-    mastered: ordered.filter((i) => i.status === "mastered").length,
-    total: ordered.length,
+    mastered,
+    total,
+    percent: total ? Math.round((mastered / total) * 100) : 0,
+    complete: total > 0 && mastered === total,
     currentLevel: next?.challenge.level ?? ordered.at(-1)?.challenge.level ?? LEVELS[0],
     nextChallenge: next?.challenge ?? null,
   };

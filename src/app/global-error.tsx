@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { logger } from "@/utils/logger";
+import { logger } from "@/lib/logger";
 import "./globals.css";
 
 // Catches unexpected errors thrown by the root layout itself. It replaces the layout,
@@ -13,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    logger.error("Unexpected error in root layout", error);
+    logger.error("Unexpected error in root layout", { digest: error.digest }, error);
   }, [error]);
 
   return (

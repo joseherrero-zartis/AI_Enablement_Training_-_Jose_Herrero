@@ -21,7 +21,6 @@ async function ProgressSummary() {
   // SQLite reads are synchronous; without this they would be frozen into the build-time prerender.
   await connection();
   const summary = summarizeProgress(listJourney(getDb()));
-  const percent = summary.total ? Math.round((summary.mastered / summary.total) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -30,7 +29,7 @@ async function ProgressSummary() {
           {summary.mastered} / {summary.total} mastered
         </p>
         <div className="mt-3 h-2 rounded-full bg-black/10 dark:bg-white/15">
-          <div className="h-2 rounded-full bg-emerald-600" style={{ width: `${percent}%` }} />
+          <div className="h-2 rounded-full bg-emerald-600" style={{ width: `${summary.percent}%` }} />
         </div>
         <p className="mt-3 text-sm opacity-80">
           Current level: <strong>{LEVEL_LABELS[summary.currentLevel]}</strong>
@@ -39,16 +38,18 @@ async function ProgressSummary() {
 
       <section>
         <h2 className="mb-2 text-lg font-medium">Next challenge</h2>
-        {summary.nextChallenge ? (
-          <Link
-            href={`/challenges/${summary.nextChallenge.slug}`}
-            className="block rounded-lg border border-black/10 p-4 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/5"
-          >
-            <p className="font-medium">{summary.nextChallenge.title}</p>
-            <p className="text-sm opacity-70">{summary.nextChallenge.technique}</p>
-          </Link>
-        ) : (
+        {summary.complete ? (
           <p>You&apos;ve mastered the whole journey. 🎉</p>
+        ) : (
+          summary.nextChallenge && (
+            <Link
+              href={`/challenges/${summary.nextChallenge.slug}`}
+              className="block rounded-lg border border-black/10 p-4 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/5"
+            >
+              <p className="font-medium">{summary.nextChallenge.title}</p>
+              <p className="text-sm opacity-70">{summary.nextChallenge.technique}</p>
+            </Link>
+          )
         )}
       </section>
     </div>
