@@ -52,3 +52,12 @@ Expected errors are returned as values. Unexpected errors are thrown.
 - TypeScript strict mode. Import from `src` with the `@/` alias.
 - Tailwind for styling. Support dark mode with `dark:` variants, as the existing pages do.
 - Tests sit next to their code as `*.test.ts`. Use an in-memory DB for query tests.
+
+## Training diary (`REFLECTION.md`)
+
+`REFLECTION.md` is the developer's personal diary of this training: what they did, learnt and felt each day. It isn't project documentation.
+
+- **Only add, never rewrite.** When asked to update it, add the new reflection at the end, under the current day's heading (or a new `## Day N` heading). Leave every earlier entry exactly as it is.
+- **Change a past entry only when asked to,** and only the entry the developer names.
+- **Old entries aren't "out of date".** A line like "the logger isn't committed yet" was true when it was written. Don't fix it, and don't suggest fixing it in replies or in `HANDOFF.md`.
+- **Write in the developer's voice:** first person ("I"), plain language, the same style as the existing entries.
