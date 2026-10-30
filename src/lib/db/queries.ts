@@ -1,6 +1,7 @@
-// Read queries, plus the mutations added with their features (log attempt so far; record changes and mark mastered come later).
+// Read queries, plus the mutations added with their features (log attempt with its recipe changes so far; mark mastered comes later).
 import type { Db } from "@/lib/db/client";
 import type { AttemptInput } from "@/lib/domain/attempts";
+import type { RecipeChangeInput } from "@/lib/domain/recipe-changes";
 import { getStatus } from "@/lib/domain/journey";
 import type { Attempt, Challenge, ChallengeProgress, JourneyItem, RecipeChange } from "@/lib/types";
 
@@ -68,23 +69,39 @@ export function getChallengeBySlug(db: Db, slug: string): ChallengeDetail | null
   };
 }
 
-/** Inserts one attempt and returns its id. Callers validate the input and the challenge's status first. */
-export function insertAttempt(db: Db, challengeId: number, input: AttemptInput): number {
-  const result = db
-    .prepare(
-      `INSERT INTO attempts (challenge_id, baked_on, notes, rating, taste_rating, texture_rating, appearance_rating)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
-      challengeId,
-      input.bakedOn,
-      input.notes,
-      input.rating,
-      input.tasteRating,
-      input.textureRating,
-      input.appearanceRating,
+/**
+ * Inserts one attempt with its recipe changes and returns the attempt id. All rows are saved in one
+ * transaction, so if any insert fails nothing is saved. Callers validate the input and the challenge's status first.
+ */
+export function insertAttempt(
+  db: Db,
+  challengeId: number,
+  input: AttemptInput,
+  changes: RecipeChangeInput[] = [],
+): number {
+  return db.transaction(() => {
+    const result = db
+      .prepare(
+        `INSERT INTO attempts (challenge_id, baked_on, notes, rating, taste_rating, texture_rating, appearance_rating)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        challengeId,
+        input.bakedOn,
+        input.notes,
+        input.rating,
+        input.tasteRating,
+        input.textureRating,
+        input.appearanceRating,
+      );
+    const attemptId = Number(result.lastInsertRowid);
+
+    const insertChange = db.prepare(
+      "INSERT INTO recipe_changes (attempt_id, description, outcome) VALUES (?, ?, ?)",
     );
-  return Number(result.lastInsertRowid);
+    for (const change of changes) insertChange.run(attemptId, change.description, change.outcome);
+    return attemptId;
+  })();
 }
 
 function listAttempts(db: Db, challengeId: number): Attempt[] {

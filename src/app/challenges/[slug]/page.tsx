@@ -81,7 +81,6 @@ async function ChallengeDetail({ slug }: { slug: string }) {
             <h2 className="text-lg font-medium">Attempts</h2>
             {/* "Today" uses the server's local date. Fine because the app runs on the baker's own machine (single user). */}
             <LogAttemptForm challengeId={challenge.id} today={toIsoDate(new Date())} />
-            {/* TODO(F3): recipe changes on an attempt. */}
             {attempts.length === 0 ? (
               <p className="opacity-60">No attempts logged yet.</p>
             ) : (
