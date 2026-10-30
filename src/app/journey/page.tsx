@@ -34,9 +34,14 @@ async function ChallengeList() {
           {items.map(({ challenge, status }) => {
             const content = (
               <>
-                <span className="w-6 text-sm opacity-50">{challenge.position}</span>
+                <span className="w-6 text-sm text-black/60 dark:text-white/60">{challenge.position}</span>
                 <span className="flex-1">
-                  <span className="block font-medium">{challenge.title}</span>
+                  {/* Locked rows mute only the title, so the row stays readable (WCAG contrast). */}
+                  <span
+                    className={`block font-medium ${status === "locked" ? "text-black/60 dark:text-white/60" : ""}`}
+                  >
+                    {challenge.title}
+                  </span>
                   <span className="block text-sm opacity-70">{challenge.technique}</span>
                 </span>
                 <StatusBadge status={status} />
@@ -48,7 +53,7 @@ async function ChallengeList() {
             return (
               <li key={challenge.id}>
                 {status === "locked" ? (
-                  <div className={`${className} opacity-60`} aria-disabled="true">
+                  <div className={className} aria-disabled="true">
                     {content}
                   </div>
                 ) : (

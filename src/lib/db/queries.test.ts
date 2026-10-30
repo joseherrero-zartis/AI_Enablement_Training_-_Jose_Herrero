@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { openDatabase, seedJourney } from "@/lib/db/client";
-import { getChallengeBySlug, listJourney } from "@/lib/db/queries";
+import { getChallengeById, getChallengeBySlug, insertAttempt, listJourney } from "@/lib/db/queries";
 import { SEED_CHALLENGES } from "@/lib/db/seed-data";
 import { LEVELS } from "@/lib/types";
 
@@ -93,5 +93,61 @@ describe("getChallengeBySlug", () => {
 
   it("returns null for an unknown slug", () => {
     expect(getChallengeBySlug(openDatabase(":memory:"), "nope")).toBeNull();
+  });
+});
+
+describe("insertAttempt", () => {
+  it("saves every field and moves the challenge from not started to in progress", () => {
+    const db = openDatabase(":memory:");
+    const before = getChallengeBySlug(db, "banana-bread")!;
+    expect(before.status).toBe("not_started");
+
+    const id = insertAttempt(db, before.challenge.id, {
+      bakedOn: "2026-10-30",
+      notes: "Great crumb",
+      rating: 4,
+      tasteRating: 5,
+      textureRating: null,
+      appearanceRating: 3,
+    });
+
+    const after = getChallengeBySlug(db, "banana-bread")!;
+    expect(after.status).toBe("in_progress");
+    expect(after.attempts).toHaveLength(1);
+    expect(after.attempts[0]).toMatchObject({
+      id,
+      challengeId: before.challenge.id,
+      bakedOn: "2026-10-30",
+      notes: "Great crumb",
+      rating: 4,
+      tasteRating: 5,
+      textureRating: null,
+      appearanceRating: 3,
+    });
+  });
+
+  it("is backed by a database check on the rating", () => {
+    const db = openDatabase(":memory:");
+    const id = listJourney(db)[0].challenge.id;
+    expect(() =>
+      db
+        .prepare("INSERT INTO attempts (challenge_id, baked_on, rating) VALUES (?, '2026-10-30', 6)")
+        .run(id),
+    ).toThrow();
+  });
+});
+
+describe("getChallengeById", () => {
+  it("returns the challenge with its derived status", () => {
+    const db = openDatabase(":memory:");
+    const first = getChallengeBySlug(db, "banana-bread")!;
+    expect(getChallengeById(db, first.challenge.id)?.status).toBe("not_started");
+
+    const second = listJourney(db)[1];
+    expect(getChallengeById(db, second.challenge.id)?.status).toBe("locked");
+  });
+
+  it("returns null for an unknown id", () => {
+    expect(getChallengeById(openDatabase(":memory:"), 9999)).toBeNull();
   });
 });

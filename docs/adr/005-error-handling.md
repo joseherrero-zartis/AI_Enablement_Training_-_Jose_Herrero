@@ -2,6 +2,8 @@
 
 **Status:** Accepted · **Date:** 2026-10-29
 
+_Amended 2026-10-30: the action result also carries `values`, so the form can show the submitted fields again after an error._
+
 ## Context
 
 All writes go through Server Actions (ADR 003), and each one must validate its input and enforce domain rules on the server. US-02 needs bad input (for example a missing rating or one outside 1–5) to be "rejected with a clear error message, and nothing is saved", and it needs the server to refuse attempts on locked challenges. Other failures, such as a SQLite error or a bug, are rare and the user can't fix them.
@@ -14,7 +16,7 @@ The project has to pick one approach for every action, and keep it simple (it's 
 
 Errors are split into **expected** and **unexpected**, and each kind is handled in one place.
 
-- **Expected errors** (invalid input, rule violations such as a locked challenge, a challenge that doesn't exist) are **returned** from the Server Action as `{ error?: string; fieldErrors?: Record<string, string> }`, never thrown. The form is a small `"use client"` component that reads the result with `useActionState` and shows the messages. Nothing is written when validation fails.
+- **Expected errors** (invalid input, rule violations such as a locked challenge, a challenge that doesn't exist) are **returned** from the Server Action as `{ error?: string; fieldErrors?: Record<string, string>; values?: Record<string, string> }`, never thrown. `values` echoes the submitted fields so the form can show them again, because React resets forms after an action. The form is a small `"use client"` component that reads the result with `useActionState` and shows the messages. Nothing is written when validation fails.
 - **Validation** uses hand-written pure functions in `src/lib/domain/` (for example `validateAttempt()`) that return field errors, with unit tests. No validation library.
 - **Every action follows the same order:** parse `FormData` → validate → check domain rules against the DB → write (in one transaction if it touches more than one row) → `refresh()`/`revalidatePath()` or redirect.
 - **Missing resources** in pages call `notFound()`.

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NavLink } from "@/components/NavLink";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,9 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-semibold">
               Baker&apos;s Journey
             </Link>
-            <Link href="/journey" className="text-sm opacity-80 hover:opacity-100">
-              Journey
-            </Link>
+            <NavLink href="/journey">Journey</NavLink>
           </nav>
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>
