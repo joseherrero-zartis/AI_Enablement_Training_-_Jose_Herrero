@@ -52,3 +52,11 @@ export interface JourneyItem {
   challenge: Challenge;
   status: ChallengeStatus;
 }
+
+/** What a Server Action returns for expected errors. Nothing is thrown for these (ADR 005). */
+export interface ActionResult {
+  error?: string;
+  fieldErrors?: Record<string, string>;
+  /** Submitted form values, so the form can show them again after an error. */
+  values?: Record<string, string>;
+}

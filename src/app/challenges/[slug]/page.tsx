@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { LogAttemptForm } from "@/components/LogAttemptForm";
 import { StatusBadge } from "@/components/StatusBadge";
 import { getDb } from "@/lib/db/client";
 import { getChallengeBySlug } from "@/lib/db/queries";
+import { toIsoDate } from "@/lib/domain/attempts";
 import { LEVEL_LABELS, meetsMasteryHint } from "@/lib/domain/journey";
 
 // F2–F4: Challenge detail with attempts, recipe changes and mastery.
@@ -77,7 +79,9 @@ async function ChallengeDetail({ slug }: { slug: string }) {
 
           <section className="space-y-3">
             <h2 className="text-lg font-medium">Attempts</h2>
-            {/* TODO(F2, F3): form to log an attempt with notes, ratings and recipe changes. */}
+            {/* "Today" uses the server's local date. Fine because the app runs on the baker's own machine (single user). */}
+            <LogAttemptForm challengeId={challenge.id} today={toIsoDate(new Date())} />
+            {/* TODO(F3): recipe changes on an attempt. */}
             {attempts.length === 0 ? (
               <p className="opacity-60">No attempts logged yet.</p>
             ) : (
@@ -90,6 +94,17 @@ async function ChallengeDetail({ slug }: { slug: string }) {
                     <p className="font-medium">
                       {attempt.bakedOn} · {attempt.rating}/5
                     </p>
+                    {(attempt.tasteRating || attempt.textureRating || attempt.appearanceRating) && (
+                      <p className="text-sm opacity-70">
+                        {[
+                          attempt.tasteRating && `Taste ${attempt.tasteRating}/5`,
+                          attempt.textureRating && `Texture ${attempt.textureRating}/5`,
+                          attempt.appearanceRating && `Appearance ${attempt.appearanceRating}/5`,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
                     {attempt.notes && <p className="mt-1 whitespace-pre-wrap">{attempt.notes}</p>}
                     {attempt.changes.length > 0 && (
                       <ul className="mt-2 list-disc pl-5 text-sm">

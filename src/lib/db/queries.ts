@@ -1,5 +1,6 @@
-// Read queries. Mutations (log attempt, record changes, mark mastered) are added with their features.
+// Read queries, plus the mutations added with their features (log attempt so far; record changes and mark mastered come later).
 import type { Db } from "@/lib/db/client";
+import type { AttemptInput } from "@/lib/domain/attempts";
 import { getStatus } from "@/lib/domain/journey";
 import type { Attempt, Challenge, ChallengeProgress, JourneyItem, RecipeChange } from "@/lib/types";
 
@@ -36,6 +37,16 @@ export function listJourney(db: Db): JourneyItem[] {
   });
 }
 
+export function getChallengeById(db: Db, id: number): JourneyItem | null {
+  const row = db.prepare(`${CHALLENGE_WITH_PROGRESS} WHERE c.id = ?`).get(id) as
+    | ChallengeRow
+    | undefined;
+  if (!row) return null;
+
+  const { challenge, progress } = splitRow(row);
+  return { challenge, status: getStatus(progress) };
+}
+
 export interface ChallengeDetail extends JourneyItem {
   progress: ChallengeProgress;
   /** Newest first (PRD F2). */
@@ -55,6 +66,25 @@ export function getChallengeBySlug(db: Db, slug: string): ChallengeDetail | null
     status: getStatus(progress),
     attempts: listAttempts(db, challenge.id),
   };
+}
+
+/** Inserts one attempt and returns its id. Callers validate the input and the challenge's status first. */
+export function insertAttempt(db: Db, challengeId: number, input: AttemptInput): number {
+  const result = db
+    .prepare(
+      `INSERT INTO attempts (challenge_id, baked_on, notes, rating, taste_rating, texture_rating, appearance_rating)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      challengeId,
+      input.bakedOn,
+      input.notes,
+      input.rating,
+      input.tasteRating,
+      input.textureRating,
+      input.appearanceRating,
+    );
+  return Number(result.lastInsertRowid);
 }
 
 function listAttempts(db: Db, challengeId: number): Attempt[] {
