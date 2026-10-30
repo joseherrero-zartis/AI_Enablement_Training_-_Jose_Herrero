@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canLogAttempt, toIsoDate, validateAttempt } from "@/lib/domain/attempts";
+import { canLogAttempt, formatDisplayDate, toIsoDate, validateAttempt } from "@/lib/domain/attempts";
 import type { ChallengeStatus } from "@/lib/types";
 
 describe("validateAttempt", () => {
@@ -88,6 +88,16 @@ describe("validateAttempt", () => {
 describe("toIsoDate", () => {
   it("uses the local date, not UTC", () => {
     expect(toIsoDate(new Date(2026, 0, 5, 23, 30))).toBe("2026-01-05");
+  });
+});
+
+describe("formatDisplayDate", () => {
+  it("formats an ISO date for display", () => {
+    expect(formatDisplayDate("2026-10-30")).toBe("Fri 30 Oct 2026");
+  });
+
+  it("ignores the time part of a timestamp", () => {
+    expect(formatDisplayDate("2026-01-05T23:30:00Z")).toBe("Mon 5 Jan 2026");
   });
 });
 

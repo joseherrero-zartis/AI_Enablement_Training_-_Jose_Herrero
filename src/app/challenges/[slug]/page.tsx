@@ -6,14 +6,14 @@ import { LogAttemptForm } from "@/components/LogAttemptForm";
 import { StatusBadge } from "@/components/StatusBadge";
 import { getDb } from "@/lib/db/client";
 import { getChallengeBySlug } from "@/lib/db/queries";
-import { toIsoDate } from "@/lib/domain/attempts";
+import { formatDisplayDate, toIsoDate } from "@/lib/domain/attempts";
 import { LEVEL_LABELS, meetsMasteryHint } from "@/lib/domain/journey";
 
 // F2–F4: Challenge detail with attempts, recipe changes and mastery.
 export default function ChallengePage({ params }: PageProps<"/challenges/[slug]">) {
   return (
     <div className="space-y-6">
-      <Link href="/journey" className="text-sm opacity-70 hover:opacity-100">
+      <Link href="/journey" className="inline-block py-2 text-sm opacity-70 hover:opacity-100">
         ← Back to the journey
       </Link>
       <Suspense fallback={<p className="opacity-60">Loading challenge…</p>}>
@@ -64,7 +64,7 @@ async function ChallengeDetail({ slug }: { slug: string }) {
             <h2 className="text-lg font-medium">Mastery</h2>
             {status === "mastered" ? (
               <p>
-                Mastered on {progress.masteredAt?.slice(0, 10)}.
+                Mastered on {progress.masteredAt && formatDisplayDate(progress.masteredAt)}.
                 {progress.masteryNote && <> “{progress.masteryNote}”</>}
               </p>
             ) : (
@@ -92,7 +92,7 @@ async function ChallengeDetail({ slug }: { slug: string }) {
                     className="rounded-lg border border-black/10 p-4 dark:border-white/15"
                   >
                     <p className="font-medium">
-                      {attempt.bakedOn} · {attempt.rating}/5
+                      {formatDisplayDate(attempt.bakedOn)} · Overall {attempt.rating}/5
                     </p>
                     {(attempt.tasteRating || attempt.textureRating || attempt.appearanceRating) && (
                       <p className="text-sm opacity-70">

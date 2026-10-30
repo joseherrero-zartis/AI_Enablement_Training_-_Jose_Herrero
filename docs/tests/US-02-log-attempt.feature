@@ -19,8 +19,10 @@ Feature: US-02 Log a baking attempt
     Given I am on the "Banana bread" page
     When I fill in an overall rating of 4 and some notes
     And I submit the form
-    Then the attempt appears in the attempts list without me reloading the page
-    And it shows the date, the notes and the rating "4/5"
+    Then I see the message "Attempt logged for" followed by the date of the bake
+    And the attempt appears in the attempts list without me reloading the page
+    And it shows the date, the notes and the rating "Overall 4/5"
+    And the form is empty again, with today's date
 
   @US-02 @AC-2
   Scenario: A logged attempt is still there after restarting the app

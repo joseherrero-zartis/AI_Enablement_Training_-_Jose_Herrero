@@ -89,6 +89,20 @@ export function toIsoDate(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+const DISPLAY_DATE = new Intl.DateTimeFormat("en-GB", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** Formats an ISO date (YYYY-MM-DD) for display, e.g. "Fri 30 Oct 2026". UTC so the day never shifts. */
+export function formatDisplayDate(isoDate: string): string {
+  const [year, month, day] = isoDate.slice(0, 10).split("-").map(Number);
+  return DISPLAY_DATE.format(new Date(Date.UTC(year, month - 1, day))).replace(",", "");
+}
+
 /** Only locked challenges refuse attempts. Mastered ones still accept them. */
 export function canLogAttempt(status: ChallengeStatus): boolean {
   return status !== "locked";
