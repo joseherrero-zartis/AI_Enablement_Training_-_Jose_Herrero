@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { logAttempt } from "@/app/challenges/[slug]/actions";
+import { INPUT } from "@/components/form-styles";
+import { RecipeChangeRows } from "@/components/RecipeChangeRows";
 import type { ActionResult } from "@/lib/types";
 
 import { formatDisplayDate } from "@/lib/domain/attempts";
@@ -9,9 +11,6 @@ import { formatDisplayDate } from "@/lib/domain/attempts";
 // `submissions` changes the form's key after every submit, so it remounts and the defaults below apply again.
 // `loggedOn` is the date of the attempt just saved, for the confirmation message.
 type FormState = ActionResult & { submissions: number; loggedOn?: string };
-
-const INPUT =
-  "mt-1 block w-full rounded-md border border-black/20 bg-transparent px-2 py-2.5 dark:border-white/25 aria-[invalid=true]:border-red-600 dark:aria-[invalid=true]:border-red-400";
 
 function RatingSelect({
   name,
@@ -160,6 +159,8 @@ export function LogAttemptForm({ challengeId, today }: { challengeId: number; to
           error={errors.appearanceRating}
         />
       </div>
+
+      <RecipeChangeRows values={values} errors={errors} />
 
       {state.error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">

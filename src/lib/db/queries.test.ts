@@ -151,3 +151,48 @@ describe("getChallengeById", () => {
     expect(getChallengeById(openDatabase(":memory:"), 9999)).toBeNull();
   });
 });
+
+describe("insertAttempt with recipe changes", () => {
+  const input = {
+    bakedOn: "2026-10-30",
+    notes: null,
+    rating: 3,
+    tasteRating: null,
+    textureRating: null,
+    appearanceRating: null,
+  };
+  const count = (db: ReturnType<typeof openDatabase>, table: string) =>
+    (db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n;
+
+  it("saves the changes in order, linked to the attempt", () => {
+    const db = openDatabase(":memory:");
+    const { challenge } = getChallengeBySlug(db, "banana-bread")!;
+
+    const id = insertAttempt(db, challenge.id, input, [
+      { description: "hydration 65% → 70%", outcome: "more open crumb" },
+      { description: "less sugar", outcome: null },
+    ]);
+
+    const [attempt] = getChallengeBySlug(db, "banana-bread")!.attempts;
+    expect(attempt.id).toBe(id);
+    expect(attempt.changes.map((c) => [c.attemptId, c.description, c.outcome])).toEqual([
+      [id, "hydration 65% → 70%", "more open crumb"],
+      [id, "less sugar", null],
+    ]);
+  });
+
+  it("saves nothing if one of the changes fails", () => {
+    const db = openDatabase(":memory:");
+    const { challenge } = getChallengeBySlug(db, "banana-bread")!;
+
+    expect(() =>
+      insertAttempt(db, challenge.id, input, [
+        { description: "fine", outcome: null },
+        { description: null as unknown as string, outcome: null },
+      ]),
+    ).toThrow();
+
+    expect(count(db, "attempts")).toBe(0);
+    expect(count(db, "recipe_changes")).toBe(0);
+  });
+});
